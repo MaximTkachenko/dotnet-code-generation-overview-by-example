@@ -1,4 +1,4 @@
-# dotnet-runtime-code-generation-samples
+[![.NET](https://github.com/MaximTkachenko/dotnet-code-generation-overview-by-example/actions/workflows/dotnet.yml/badge.svg)](https://github.com/MaximTkachenko/dotnet-code-generation-overview-by-example/actions/workflows/dotnet.yml)
 
 TODO add link to the article
 
