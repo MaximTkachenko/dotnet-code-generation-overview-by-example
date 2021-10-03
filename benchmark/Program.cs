@@ -15,7 +15,6 @@ namespace Parsers.Benchmarks
     {
         private EmitIlParserFactory _emitIlParserFactory;
         private ExpressionTreeParserFactory _expressionTreeParserFactory;
-        private ReflectionParserFactory _reflectionParserFactory;
         private SigilParserFactory _sigilParserFactory;
 
         private Func<string[], Data> _emitIlParser;
@@ -32,7 +31,6 @@ namespace Parsers.Benchmarks
         {
             _emitIlParserFactory = new EmitIlParserFactory();
             _expressionTreeParserFactory = new ExpressionTreeParserFactory();
-            _reflectionParserFactory = new ReflectionParserFactory();
             _sigilParserFactory = new SigilParserFactory();
 
             _emitIlParser = new EmitIlParserFactory().GetParser<Data>();
@@ -53,12 +51,6 @@ namespace Parsers.Benchmarks
         public Func<string[], Data> GetParser_ExpressionTree()
         {
             return _expressionTreeParserFactory.GetParser<Data>();
-        }
-
-        [Benchmark]
-        public Func<string[], Data> GetParser_Reflection()
-        {
-            return _reflectionParserFactory.GetParser<Data>();
         }
 
         [Benchmark]
