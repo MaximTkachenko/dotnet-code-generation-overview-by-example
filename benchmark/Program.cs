@@ -101,7 +101,7 @@ namespace Parsers.Benchmarks
             return _sourceGeneratorParser.Invoke(Input);
         }
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public Data NativeCall()
         {
             var data = new Data();
