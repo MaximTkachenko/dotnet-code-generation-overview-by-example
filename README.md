@@ -1,6 +1,6 @@
 [![.NET](https://github.com/MaximTkachenko/dotnet-code-generation-overview-by-example/actions/workflows/dotnet.yml/badge.svg)](https://github.com/MaximTkachenko/dotnet-code-generation-overview-by-example/actions/workflows/dotnet.yml)
 
-[Dotnet code generation overview by example](https://mtkachenko.me/blog/dotnet/2021/10/03/dotnet-code-generation.html)
+[Dotnet code generation overview by example](https://mtkachenko.me/blog/2021/10/03/dotnet-code-generation.html)
 
 ``` ini
 
