@@ -5,6 +5,7 @@ using Parsers.Common;
 namespace Parsers.Benchmarks
 {
     // ReSharper disable once InconsistentNaming
+    [MemoryDiagnoser]
     public class ParserInvocation_Benchmark
     {
         private Func<string[], Data> _emitIlParser;
