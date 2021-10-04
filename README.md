@@ -13,7 +13,7 @@ Intel Core i7-8550U CPU 1.80GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical c
 
 ```
 
-# Generation of parser
+## Generation of parser
 |         Method |         Mean |        Error |       StdDev |     Gen 0 |  Gen 1 |  Gen 2 | Allocated |
 |--------------- |-------------:|-------------:|-------------:|----------:|-------:|-------:|----------:|
 |         EmitIl |     22.02 μs |     0.495 μs |     1.429 μs |    1.2817 | 0.6409 | 0.0305 |      5 KB |
@@ -21,8 +21,7 @@ Intel Core i7-8550U CPU 1.80GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical c
 |          Sigil |    642.63 μs |    12.305 μs |    29.243 μs |  112.3047 |      - |      - |    460 KB |
 |         Roslyn | 71,605.64 μs | 2,533.732 μs | 7,350.817 μs | 1000.0000 |      - |      - |  5,826 KB |
 
-# Invocation of parser
-```
+## Invocation of parser
 |          Method |        Mean |     Error |    StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
 |---------------- |------------:|----------:|----------:|------:|--------:|-------:|----------:|
 |          EmitIl |    374.7 ns |   7.75 ns |  22.36 ns |  1.02 |    0.08 | 0.0095 |      40 B |
