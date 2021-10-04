@@ -12,16 +12,23 @@ Intel Core i7-8550U CPU 1.80GHz (Kaby Lake R), 1 CPU, 8 logical and 4 physical c
 
 
 ```
-|                           Method |              Mean |             Error |            StdDev |            Median |     Gen 0 |    Gen 1 |   Allocated |
-|--------------------------------- |------------------:|------------------:|------------------:|------------------:|----------:|---------:|------------:|
-|                 GetParser_EmitIl |     21,674.487 ns |       432.3948 ns |     1,205.3440 ns |     21,405.957 ns |    1.2817 |   0.6409 |     5,472 B |
-|         GetParser_ExpressionTree |    728,408.643 ns |    16,212.6425 ns |    47,548.8739 ns |    715,700.293 ns |    2.9297 |   0.9766 |    13,926 B |
-|                  GetParser_Sigil |    668,290.456 ns |    14,567.7839 ns |    42,031.3875 ns |    657,595.947 ns |  112.3047 |        - |   470,727 B |
-|                 GetParser_Roslyn | 60,652,769.231 ns | 1,199,616.1232 ns | 2,804,064.0147 ns | 60,564,942.857 ns | 1000.0000 | 285.7143 | 6,257,459 B |
-|          ParserInvocation_EmitIl |        395.822 ns |         8.5046 ns |        25.0761 ns |        390.066 ns |    0.0095 |        - |        40 B |
-|  ParserInvocation_ExpressionTree |        385.048 ns |         7.7925 ns |        21.8511 ns |        380.575 ns |    0.0095 |        - |        40 B |
-|      ParserInvocation_Reflection |     13,064.371 ns |       277.1491 ns |       812.8303 ns |     12,883.695 ns |    0.7782 |        - |     3,256 B |
-|           ParserInvocation_Sigil |        386.315 ns |         7.8140 ns |        18.1102 ns |        383.428 ns |    0.0095 |        - |        40 B |
-|          ParserInvocation_Roslyn |        403.248 ns |         8.1247 ns |        21.9656 ns |        399.653 ns |    0.0095 |        - |        40 B |
-| ParserInvocation_SourceGenerator |        385.155 ns |         8.6582 ns |        24.8419 ns |        379.948 ns |    0.0095 |        - |        40 B |
-|                       NativeCall |        383.488 ns |         7.7245 ns |        21.4046 ns |        380.181 ns |    0.0095 |        - |        40 B |
+
+# Generation of parser
+|         Method |         Mean |        Error |       StdDev |     Gen 0 |  Gen 1 |  Gen 2 | Allocated |
+|--------------- |-------------:|-------------:|-------------:|----------:|-------:|-------:|----------:|
+|         EmitIl |     22.02 μs |     0.495 μs |     1.429 μs |    1.2817 | 0.6409 | 0.0305 |      5 KB |
+| ExpressionTree |    683.68 μs |    13.609 μs |    31.268 μs |    2.9297 | 0.9766 |      - |     14 KB |
+|          Sigil |    642.63 μs |    12.305 μs |    29.243 μs |  112.3047 |      - |      - |    460 KB |
+|         Roslyn | 71,605.64 μs | 2,533.732 μs | 7,350.817 μs | 1000.0000 |      - |      - |  5,826 KB |
+
+# Invocation of parser
+```
+|          Method |        Mean |     Error |    StdDev | Ratio | RatioSD |  Gen 0 | Allocated |
+|---------------- |------------:|----------:|----------:|------:|--------:|-------:|----------:|
+|          EmitIl |    374.7 ns |   7.75 ns |  22.36 ns |  1.02 |    0.08 | 0.0095 |      40 B |
+|  ExpressionTree |    378.1 ns |   7.56 ns |  20.57 ns |  1.03 |    0.08 | 0.0095 |      40 B |
+|      Reflection | 13,625.0 ns | 272.60 ns | 750.81 ns | 37.29 |    2.29 | 0.7782 |   3,256 B |
+|           Sigil |    378.9 ns |   7.69 ns |  21.06 ns |  1.03 |    0.07 | 0.0095 |      40 B |
+|          Roslyn |    404.2 ns |   7.55 ns |  17.80 ns |  1.10 |    0.07 | 0.0095 |      40 B |
+| SourceGenerator |    384.4 ns |   7.79 ns |  21.46 ns |  1.05 |    0.08 | 0.0095 |      40 B |
+| ManuallyWritten |    367.8 ns |   7.36 ns |  15.68 ns |  1.00 |    0.00 | 0.0095 |      40 B |
