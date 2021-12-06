@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Parsers.Common
+namespace Parsers
 {
     public interface IParserFactory
     {

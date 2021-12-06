@@ -8,7 +8,6 @@ using System.Runtime.Loader;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Parsers.Common;
 
 namespace Parsers
 {
@@ -32,7 +31,7 @@ namespace Parsers
             var builder = new StringBuilder();
             builder.AppendLine(@"
 using System;
-using Parsers.Common;
+using Parsers;
 
 public class RoslynGeneratedParserFactory : IParserFactory 
 {");

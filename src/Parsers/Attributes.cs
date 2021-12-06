@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Parsers.Common
+namespace Parsers
 {
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ParserOutputAttribute : Attribute

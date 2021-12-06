@@ -23,8 +23,8 @@ namespace Parsers.SourceGenerator
         public void Execute(GeneratorExecutionContext context)
         {
             var compilation = context.Compilation;
-            var parserOutputTypeSymbol = compilation.GetTypeByMetadataName("Parsers.Common.ParserOutputAttribute");
-            var attributeIndexTypeSymbol = compilation.GetTypeByMetadataName("Parsers.Common.ArrayIndexAttribute");
+            var parserOutputTypeSymbol = compilation.GetTypeByMetadataName("Parsers.ParserOutputAttribute");
+            var attributeIndexTypeSymbol = compilation.GetTypeByMetadataName("Parsers.ArrayIndexAttribute");
             var typesToParse = new List<ITypeSymbol>();
 
             foreach (var syntaxTree in compilation.SyntaxTrees)
@@ -43,7 +43,7 @@ namespace Parsers.SourceGenerator
             var builder = new StringBuilder();
             builder.AppendLine(@"
 using System;
-using Parsers.Common;
+using Parsers;
 namespace BySourceGenerator
 {
 public class Parser : IParserFactory 

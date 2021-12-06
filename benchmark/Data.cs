@@ -1,5 +1,4 @@
 ﻿using System;
-using Parsers.Common;
 
 namespace Parsers.Benchmarks
 {

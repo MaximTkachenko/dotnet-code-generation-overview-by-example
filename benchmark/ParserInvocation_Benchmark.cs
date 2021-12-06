@@ -1,6 +1,5 @@
 ﻿using System;
 using BenchmarkDotNet.Attributes;
-using Parsers.Common;
 
 namespace Parsers.Benchmarks
 {
