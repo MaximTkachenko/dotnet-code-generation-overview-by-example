@@ -44,7 +44,7 @@ namespace Parsers.Tests
             new object[] { new SigilParserFactory() },
             new object[] { new CachedParserFactory(new SigilParserFactory()) },
             new object[] { RoslynParserInitializer.CreateFactory() },
-            new object[] { (IParserFactory)Activator.CreateInstance(Type.GetType("BySourceGenerator.Parser")) },
+            new object[] { new BySourceGenerator.Parser() },
             new object[] { new ReflectionParserFactory() },
         };
     }
