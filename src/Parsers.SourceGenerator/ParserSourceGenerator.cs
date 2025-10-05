@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -10,35 +11,48 @@ namespace Parsers.SourceGenerator
     /// <summary>
     /// http://dontcodetired.com/blog/post/C-Source-Generators-Less-Boilerplate-Code-More-Productivity
     /// https://github.com/amis92/csharp-source-generators
+    ///
+    /// https://github.com/dotnet/roslyn/blob/main/docs/features/incremental-generators.cookbook.md
+    /// https://blog.jetbrains.com/dotnet/2023/07/13/debug-source-generators-in-jetbrains-rider/
+    /// https://andrewlock.net/exploring-dotnet-6-part-9-source-generator-updates-incremental-generators/#creating-a-source-generator-with-the-loggermessage-source-generator-
     /// </summary>
     [Generator]
-    public class ParserSourceGenerator : ISourceGenerator
+    public class ParserSourceGenerator : IIncrementalGenerator
     {
-        public void Initialize(GeneratorInitializationContext context)
+        public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            //uncomment to debug
-            //System.Diagnostics.Debugger.Launch();
-        }
-
-        public void Execute(GeneratorExecutionContext context)
-        {
-            var compilation = context.Compilation;
-            var parserOutputTypeSymbol = compilation.GetTypeByMetadataName("Parsers.ParserOutputAttribute");
-            var attributeIndexTypeSymbol = compilation.GetTypeByMetadataName("Parsers.ArrayIndexAttribute");
-            var typesToParse = new List<ITypeSymbol>();
-
-            foreach (var syntaxTree in compilation.SyntaxTrees)
+            var typesToParse = context.SyntaxProvider
+                .CreateSyntaxProvider<object>(
+                    predicate: static (syntaxNode, _) => syntaxNode is ClassDeclarationSyntax { AttributeLists.Count: > 0 },
+                    transform: (ctx, _) =>
+                    {
+                        var clasDeclaration = (ClassDeclarationSyntax)ctx.Node;
+                        
+                        var parserOutputTypeSymbol = ctx.SemanticModel.Compilation
+                            .GetTypeByMetadataName("Parsers.ParserOutputAttribute");
+                        
+                        var symbol = ctx.SemanticModel.GetDeclaredSymbol(clasDeclaration) as INamedTypeSymbol;
+                        if (symbol == null) return null;
+                        
+                        return symbol.GetAttributes().Any(a =>
+                            SymbolEqualityComparer.Default.Equals(a.AttributeClass, parserOutputTypeSymbol))
+                            ? symbol
+                            : null;
+                    })
+                .Where(static m => m is not null)
+                .Collect();
+            
+            context.RegisterSourceOutput(
+                context.CompilationProvider.Combine(typesToParse), 
+                (k, f ) =>
             {
-                var semanticModel = compilation.GetSemanticModel(syntaxTree);
-                typesToParse.AddRange(syntaxTree.GetRoot()
-                    .DescendantNodesAndSelf()
-                    .OfType<ClassDeclarationSyntax>()
-                    .Select(x => semanticModel.GetDeclaredSymbol(x))
-                    .OfType<ITypeSymbol>()
-                    .Where(x => x.GetAttributes().Select(a => a.AttributeClass)
-                        .Any(b => b == parserOutputTypeSymbol)));
-            }
-
+                var attributeIndexTypeSymbol = f.Left.GetTypeByMetadataName("Parsers.ArrayIndexAttribute");
+                GenerateSerializer(k, f.Right, attributeIndexTypeSymbol);
+            });
+        }
+        
+        private static void GenerateSerializer(SourceProductionContext context, ImmutableArray<object> classSymbol, INamedTypeSymbol attributeIndexTypeSymbol)
+        {
             var typeNames = new List<(string TargetTypeName, string TargetTypeFullName, string TargetTypeParserName)>();
             var builder = new StringBuilder();
             builder.AppendLine(@"
@@ -48,7 +62,7 @@ namespace BySourceGenerator
 {
 public class Parser : IParserFactory 
 {");
-            foreach (var typeSymbol in typesToParse)
+            foreach (var typeSymbol in classSymbol.OfType<INamedTypeSymbol>())
             {
                 var targetTypeName = typeSymbol.Name;
                 var targetTypeFullName = GetFullName(typeSymbol);
@@ -64,7 +78,7 @@ public class Parser : IParserFactory
                 foreach (var prop in props)
                 {
                     var attr = prop.GetAttributes().FirstOrDefault(x => x.AttributeClass == attributeIndexTypeSymbol);
-                    if (attr == null || !(attr.ConstructorArguments[0].Value is int)) continue;
+                    if (attr == null || attr.ConstructorArguments[0].Value is not int) continue;
 
                     int order = (int) attr.ConstructorArguments[0].Value;
                     if (order < 0) continue;
