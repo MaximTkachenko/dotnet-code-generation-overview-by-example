@@ -1,30 +1,17 @@
 ﻿using BenchmarkDotNet.Running;
+using Parsers.Benchmarks;
 
-namespace Parsers.Benchmarks
+var mode = args.Length == 1 ? args[0] : "all";
+switch (mode)
 {
-    class Program
-    {
-        private const string AllMode = "all";
-        private const string GetParserMode = "gp";
-        private const string ParserInvocationMode = "pi";
-
-        static void Main(string[] args)
-        {
-            var mode = args.Length == 1 ? args[0] : AllMode;
-
-            switch (mode)
-            {
-                case GetParserMode:
-                    BenchmarkRunner.Run<GetParser_Benchmark>();
-                    break;
-                case ParserInvocationMode:
-                    BenchmarkRunner.Run<ParserInvocation_Benchmark>();
-                    break;
-                default:
-                    BenchmarkRunner.Run<GetParser_Benchmark>();
-                    BenchmarkRunner.Run<ParserInvocation_Benchmark>();
-                    break;
-            }
-        }
-    }
+    case "gp":
+        BenchmarkRunner.Run<GetParser_Benchmark>();
+        break;
+    case "pi":
+        BenchmarkRunner.Run<ParserInvocation_Benchmark>();
+        break;
+    default:
+        BenchmarkRunner.Run<GetParser_Benchmark>();
+        BenchmarkRunner.Run<ParserInvocation_Benchmark>();
+        break;
 }

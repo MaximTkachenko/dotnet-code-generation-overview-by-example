@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Parsers
+namespace Parsers;
+
+internal static class TypeParsers
 {
-    internal static class TypeParsers
+    public static readonly Dictionary<Type, MethodInfo> Parsers = new()
     {
-        public static readonly Dictionary<Type, MethodInfo> Parsers = new Dictionary<Type, MethodInfo>
-        {
-            { typeof(int), typeof(int).GetMethod("TryParse", new[] {typeof(string), typeof(int).MakeByRefType()}) },
-            { typeof(DateTime), typeof(DateTime).GetMethod("TryParse", new[] {typeof(string), typeof(DateTime).MakeByRefType()}) }
-        };
-    }
+        { typeof(int), typeof(int).GetMethod("TryParse", [typeof(string), typeof(int).MakeByRefType()]) },
+        { typeof(DateTime), typeof(DateTime).GetMethod("TryParse", [typeof(string), typeof(DateTime).MakeByRefType()]) }
+    };
 }

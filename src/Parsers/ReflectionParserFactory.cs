@@ -2,52 +2,51 @@
 using System.Linq;
 using System.Reflection;
 
-namespace Parsers
+namespace Parsers;
+
+public class ReflectionParserFactory : IParserFactory
 {
-    public class ReflectionParserFactory : IParserFactory
+    public Func<string[], T> GetParser<T>() where T : new()
     {
-        public Func<string[], T> GetParser<T>() where T : new()
-        {
-            return ArrayIndexParse<T>;
-        }
+        return ArrayIndexParse<T>;
+    }
 
-        private static T ArrayIndexParse<T>(string[] data) where T : new()
+    private static T ArrayIndexParse<T>(string[] data) where T : new()
+    {
+        var instance = new T();
+        var props = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+        for (int i = 0; i < props.Length; i++)
         {
-            var instance = new T();
-            var props = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            for (int i = 0; i < props.Length; i++)
+            var attrs = props[i].GetCustomAttributes(typeof(ArrayIndexAttribute)).ToArray();
+            if (attrs.Length == 0) continue;
+
+            int order = ((ArrayIndexAttribute)attrs[0]).Order;
+            if (order < 0 || order >= data.Length) continue;
+
+            if (props[i].PropertyType == typeof(string))
             {
-                var attrs = props[i].GetCustomAttributes(typeof(ArrayIndexAttribute)).ToArray();
-                if (attrs.Length == 0) continue;
+                props[i].SetValue(instance, data[order]);
+                continue;
+            }
 
-                int order = ((ArrayIndexAttribute)attrs[0]).Order;
-                if (order < 0 || order >= data.Length) continue;
-
-                if (props[i].PropertyType == typeof(string))
+            if (props[i].PropertyType == typeof(int))
+            {
+                if (int.TryParse(data[order], out var intResult))
                 {
-                    props[i].SetValue(instance, data[order]);
-                    continue;
+                    props[i].SetValue(instance, intResult);
                 }
 
-                if (props[i].PropertyType == typeof(int))
-                {
-                    if (int.TryParse(data[order], out var intResult))
-                    {
-                        props[i].SetValue(instance, intResult);
-                    }
+                continue;
+            }
 
-                    continue;
-                }
-
-                if (props[i].PropertyType == typeof(DateTime))
+            if (props[i].PropertyType == typeof(DateTime))
+            {
+                if (DateTime.TryParse(data[order], out var dtResult))
                 {
-                    if (DateTime.TryParse(data[order], out var dtResult))
-                    {
-                        props[i].SetValue(instance, dtResult);
-                    }
+                    props[i].SetValue(instance, dtResult);
                 }
             }
-            return instance;
         }
+        return instance;
     }
 }

@@ -1,0 +1,1 @@
+dotnet build -c Release && ./bin/Release/net9.0/Parsers.Benchmarks all

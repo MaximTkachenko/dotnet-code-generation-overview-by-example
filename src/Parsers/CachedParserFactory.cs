@@ -2,23 +2,15 @@
 using System.Collections.Concurrent;
 using System.Threading;
 
-namespace Parsers
+namespace Parsers;
+
+public class CachedParserFactory(IParserFactory realParserFactory) : IParserFactory
 {
-    public class CachedParserFactory : IParserFactory
+    private readonly ConcurrentDictionary<string, Lazy<object>> _cache = new();
+
+    public Func<string[], T> GetParser<T>() where T : new()
     {
-        private readonly IParserFactory _realParserFactory;
-        private readonly ConcurrentDictionary<string, Lazy<object>> _cache;
-
-        public CachedParserFactory(IParserFactory realParserFactory)
-        {
-            _realParserFactory = realParserFactory;
-            _cache = new ConcurrentDictionary<string, Lazy<object>>();
-        }
-
-        public Func<string[], T> GetParser<T>() where T : new()
-        {
-            return (Func<string[], T>)(_cache.GetOrAdd($"aip_{_realParserFactory.GetType().FullName}_{typeof(T).FullName}", 
-                new Lazy<object>(() => _realParserFactory.GetParser<T>(), LazyThreadSafetyMode.ExecutionAndPublication)).Value);
-        }
+        return (Func<string[], T>)(_cache.GetOrAdd($"aip_{realParserFactory.GetType().FullName}_{typeof(T).FullName}", 
+            new Lazy<object>(realParserFactory.GetParser<T>, LazyThreadSafetyMode.ExecutionAndPublication)).Value);
     }
 }
