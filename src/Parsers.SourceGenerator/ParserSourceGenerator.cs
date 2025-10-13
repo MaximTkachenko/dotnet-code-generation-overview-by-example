@@ -21,7 +21,7 @@ public class ParserSourceGenerator : IIncrementalGenerator
 {
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        var classDeclarations = context.SyntaxProvider
+        var classesToGenerateFor = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (syntaxNode, _) => syntaxNode is ClassDeclarationSyntax
                 {
@@ -30,38 +30,20 @@ public class ParserSourceGenerator : IIncrementalGenerator
                 transform: (ctx, _) =>
                 {
                     var classDeclaration = (ClassDeclarationSyntax)ctx.Node;
-                    return ctx.SemanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
+                    var symbol = ctx.SemanticModel.GetDeclaredSymbol(classDeclaration) as INamedTypeSymbol;
+                    if (symbol == null) return null;
+
+                    return symbol.GetAttributes().Any(attr => attr.AttributeClass is { Name: "ParserOutputAttribute" }) 
+                        ? symbol 
+                        : null;
                 })
-            .Where(static symbol => symbol is not null);
-            
-        var parserOutputAttrSymbol = context.CompilationProvider
-            .Select((compilation, _) => compilation.GetTypeByMetadataName("Parsers.ParserOutputAttribute"));
-
-        var classSymbolsArray = classDeclarations
-            .Combine(parserOutputAttrSymbol)
-            .Select((l, _) =>
-            {
-                var (symbol, parserAttr) = l;
-                if (parserAttr is null) return null;
-
-                return symbol.GetAttributes().Any(a =>
-                    SymbolEqualityComparer.Default.Equals(a.AttributeClass, parserAttr))
-                    ? symbol
-                    : null;
-            })
             .Where(static symbol => symbol is not null)
             .Collect();
             
-        context.RegisterSourceOutput(
-            context.CompilationProvider.Combine(classSymbolsArray), 
-            (sourceProductionContext, f ) =>
-            {
-                var attributeIndexTypeSymbol = f.Left.GetTypeByMetadataName("Parsers.ArrayIndexAttribute");
-                GenerateSerializer(sourceProductionContext, f.Right, attributeIndexTypeSymbol);
-            });
+        context.RegisterSourceOutput(classesToGenerateFor, GenerateSerializer);
     }
         
-    private static void GenerateSerializer(SourceProductionContext context, ImmutableArray<INamedTypeSymbol> classSymbol, INamedTypeSymbol attributeIndexTypeSymbol)
+    private static void GenerateSerializer(SourceProductionContext context, ImmutableArray<INamedTypeSymbol> classSymbol)
     {
         var typeNames = new List<(string TargetTypeName, string TargetTypeFullName, string TargetTypeParserName)>();
         var builder = new StringBuilder();
@@ -89,8 +71,8 @@ public class Parser : IParserFactory
             var props = typeSymbol.GetMembers().OfType<IPropertySymbol>();
             foreach (var prop in props)
             {
-                var attr = prop.GetAttributes().FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.AttributeClass, attributeIndexTypeSymbol));
-                if (attr == null || attr.ConstructorArguments[0].Value is not int) continue;
+                var attr = prop.GetAttributes().FirstOrDefault(attr => attr.AttributeClass is { Name: "ArrayIndexAttribute" });
+                if (attr?.ConstructorArguments[0].Value is not int) continue;
 
                 int order = (int) attr.ConstructorArguments[0].Value;
                 if (order < 0) continue;
