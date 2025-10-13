@@ -1,9 +1,8 @@
 ﻿using System;
 
-namespace Parsers
+namespace Parsers;
+
+public interface IParserFactory
 {
-    public interface IParserFactory
-    {
-        Func<string[], T> GetParser<T>() where T : new();
-    }
+    Func<string[], T> GetParser<T>() where T : new();
 }
